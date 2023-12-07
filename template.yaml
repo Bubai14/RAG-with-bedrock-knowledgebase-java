@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless pattern - APIGW -> Lambda -> Bedrock Knowledgebase
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 120
+    MemorySize: 128
+
+Resources:
+  LogsQueryFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: /target/lambda-bedrock-knowledgebase-pattern-1.0.0-jar-with-dependencies.jar
+      Handler: com.aws.pattern.LogsQueryHandler::handleRequest
+      Runtime: java17
+      Timeout: 20
+      MemorySize: 512
+      Events:
+        LogQueryAnalyser:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /query
+            Method: any
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - "logs:CreateLogGroup"
+              Resource: "*"
